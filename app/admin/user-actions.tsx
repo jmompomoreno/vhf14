@@ -1,0 +1,12 @@
+"use client";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function UserActions({userId,status,hasProfile,profileStatus,organisationStatus}:{userId:string;status:string;hasProfile:boolean;profileStatus?:string;organisationStatus?:string}){
+ const router=useRouter();const[busy,setBusy]=useState(false);const[message,setMessage]=useState("");
+ async function act(body:Record<string,string>){setBusy(true);setMessage("");const r=await fetch("/api/admin/users",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({userId,...body})});const result=await r.json() as {error?:string};setMessage(r.ok?"Saved.":result.error??"Unable to save");setBusy(false);if(r.ok)router.refresh()}
+ function accountAction(){const action=status==="suspended"?"reactivate":"suspend";const reason=window.prompt(`Reason to ${action} this account:`)?.trim();if(reason)void act({action,reason})}
+ function review(subject:"professional"|"organisation",decision:"verified"|"rejected"){const reason=window.prompt(`Reason for ${decision} decision:`)?.trim();if(reason)void act({action:"profile_decision",subject,decision,reason})}
+ async function note(e:FormEvent<HTMLFormElement>){e.preventDefault();const form=e.currentTarget;const value=new FormData(form).get("note")?.toString().trim();if(!value)return;await act({action:"add_note",note:value});form.reset()}
+ return <section className="adminActions"><h2>Administrative actions</h2><button disabled={busy} className={status==="suspended"?"":"danger"} onClick={accountAction}>{status==="suspended"?"Reactivate account":"Suspend account"}</button>{hasProfile&&<div className="decisionRows"><div><span>Professional profile · {profileStatus}</span><button disabled={busy} onClick={()=>review("professional","verified")}>Verify</button><button disabled={busy} className="danger" onClick={()=>review("professional","rejected")}>Reject</button></div>{organisationStatus&&organisationStatus!=="not_applicable"&&<div><span>Organisation · {organisationStatus}</span><button disabled={busy} onClick={()=>review("organisation","verified")}>Verify</button><button disabled={busy} className="danger" onClick={()=>review("organisation","rejected")}>Reject</button></div>}</div>}<form onSubmit={note}><label>INTERNAL NOTE<textarea name="note" required minLength={2} maxLength={2000} placeholder="Visible to administrators only"/></label><button disabled={busy}>Add note</button></form><output aria-live="polite">{message}</output></section>
+}

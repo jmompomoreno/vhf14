@@ -1,0 +1,4 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+export function ProfileReviewButtons({id,subject}:{id:number;subject:"professional"|"organisation"}){const router=useRouter();const[busy,setBusy]=useState(false);async function decide(decision:"verified"|"rejected"){const reason=window.prompt(`Reason for ${decision} decision:`)?.trim();if(!reason)return;setBusy(true);const r=await fetch("/api/professional-profile-review",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({id,subject,decision,reason})});if(r.ok)router.refresh();else setBusy(false)}return <div className="profileReviewActions"><button disabled={busy} onClick={()=>decide("verified")}>Verify</button><button disabled={busy} className="reject" onClick={()=>decide("rejected")}>Reject</button></div>}

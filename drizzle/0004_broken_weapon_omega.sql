@@ -1,0 +1,1 @@
+ALTER TABLE `reports` ADD `time_basis` text DEFAULT 'actual' NOT NULL;

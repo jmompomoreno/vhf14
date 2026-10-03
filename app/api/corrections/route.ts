@@ -1,0 +1,25 @@
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+import { getDb } from "../../../db";
+import { contributionCredits, reportCorrections, reportRevisions, reports } from "../../../db/schema";
+import { requireVHF14Admin, getChatGPTUser } from "../../chatgpt-auth";
+
+const reviewSchema=z.object({id:z.number().int().positive(),decision:z.enum(["approve","reject"])});
+const requestSchema=z.object({reportId:z.number().int().positive(),eventTimeUtc:z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/),reason:z.string().trim().min(5).max(500)});
+
+export async function POST(request:Request){
+ const user=await getChatGPTUser();if(!user)return Response.json({error:"Authentication required"},{status:401});
+ const parsed=requestSchema.safeParse(await request.json());if(!parsed.success)return Response.json({error:"Enter a corrected UTC time and a brief reason"},{status:400});
+ const db=getDb();const[report]=await db.select().from(reports).where(and(eq(reports.id,parsed.data.reportId),eq(reports.status,"verified"))).limit(1);if(!report)return Response.json({error:"Verified event not found"},{status:404});
+ const[existing]=await db.select().from(reportCorrections).where(and(eq(reportCorrections.reportId,report.id),eq(reportCorrections.requesterUserId,user.userId),eq(reportCorrections.status,"pending"))).limit(1);if(existing)return Response.json({error:"You already have a correction under review"},{status:409});
+ await db.insert(reportCorrections).values({reportId:report.id,requesterUserId:user.userId,proposedData:JSON.stringify({...report,eventTimeUtc:parsed.data.eventTimeUtc,eventTimeOriginal:parsed.data.eventTimeUtc,timeReference:"utc"}),reason:parsed.data.reason});return Response.json({ok:true},{status:201});
+}
+
+export async function PATCH(request:Request){
+ const reviewer=await requireVHF14Admin("/admin");const parsed=reviewSchema.safeParse(await request.json());if(!parsed.success)return Response.json({error:"Invalid decision"},{status:400});const db=getDb();const[correction]=await db.select().from(reportCorrections).where(eq(reportCorrections.id,parsed.data.id)).limit(1);if(!correction||correction.status!=="pending")return Response.json({error:"Correction request not found"},{status:404});
+ if(parsed.data.decision==="reject"){await db.update(reportCorrections).set({status:"rejected",reviewedBy:reviewer.userId,reviewedAt:new Date().toISOString()}).where(eq(reportCorrections.id,correction.id));return Response.json({ok:true});}
+ const[report]=await db.select().from(reports).where(eq(reports.id,correction.reportId)).limit(1);if(!report||report.status!=="verified")return Response.json({error:"Current verified version not found"},{status:404});const proposed=JSON.parse(correction.proposedData) as Partial<typeof report>;const now=new Date().toISOString();
+ const[replacement]=await db.insert(reports).values({vesselName:proposed.vesselName??report.vesselName,imo:proposed.imo??report.imo,portCode:proposed.portCode??report.portCode,eventType:proposed.eventType??report.eventType,eventTimeUtc:proposed.eventTimeUtc??report.eventTimeUtc,eventTimeOriginal:proposed.eventTimeOriginal??proposed.eventTimeUtc??report.eventTimeOriginal,timeReference:proposed.timeReference??report.timeReference,portTimezone:proposed.portTimezone??report.portTimezone,timeBasis:proposed.timeBasis??report.timeBasis,sourceRole:proposed.sourceRole??report.sourceRole,notes:proposed.notes??report.notes,reportingCapacity:proposed.reportingCapacity??report.reportingCapacity,organisation:proposed.organisation??report.organisation,terminal:proposed.terminal??report.terminal,berth:proposed.berth??report.berth,pilotBoardingPlace:proposed.pilotBoardingPlace??report.pilotBoardingPlace,visibility:report.visibility,status:"verified",reporterUserId:report.reporterUserId,reporterEmail:report.reporterEmail,reviewedBy:reviewer.userId,reviewedAt:now,createdAt:now,portCallId:report.portCallId}).returning();
+ await db.insert(reportRevisions).values({reportId:report.id,actorUserId:reviewer.userId,action:"correction_applied",previousData:JSON.stringify(report),newData:JSON.stringify(replacement),replacementReportId:replacement.id});
+ await db.update(reports).set({status:"superseded"}).where(eq(reports.id,report.id));await db.delete(contributionCredits).where(eq(contributionCredits.reportId,report.id));if(replacement.reporterUserId)await db.insert(contributionCredits).values({userId:replacement.reporterUserId,reportId:replacement.id}).onConflictDoNothing();await db.update(reportCorrections).set({status:"approved",reviewedBy:reviewer.userId,reviewedAt:now}).where(eq(reportCorrections.id,correction.id));return Response.json({ok:true,replacementId:replacement.id});
+}

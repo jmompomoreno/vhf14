@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vhf14",
+  "main": "vinext/server/fetch-handler",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vhf14-db",
+      "database_id": "fa2f61ff-1651-4914-bad4-b64715d3be45",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}
