@@ -1,6 +1,6 @@
 # VHF14
 
-Plataforma VHF14 sobre **Cloudflare Workers + D1** (Next/Vinext, React 19, Drizzle ORM).
+Plataforma nautica VHF14 sobre **Cloudflare Workers + D1** (Next/Vinext, React 19, Drizzle ORM).
 Producción: https://vhf14.com
 
 ## Desarrollo local
