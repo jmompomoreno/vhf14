@@ -1,7 +1,2 @@
-"use client";
-
-import { VHF14Home } from "../page";
-
-export default function OperationsPage() {
-  return <VHF14Home />;
-}
+import { redirect } from "next/navigation";
+export default function OperationsPage(){redirect("/#feed")}

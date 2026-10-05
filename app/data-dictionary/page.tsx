@@ -3,7 +3,7 @@ import { dataClassification, eventDefinitions, referenceFramework, standardAbbre
 
 export default function DataDictionaryPage() {
   return <main className="dictionaryPage">
-    <header className="simpleTop"><Link className="brand" href="/"><b>14</b><span>VHF14<small>PORT OPERATIONS INTELLIGENCE</small></span></Link><nav><Link href="/">Operations</Link><Link href="/legal/data">Data policy</Link></nav></header>
+    <header className="simpleTop"><Link className="brand" href="/"><b>14</b><span>VHF14<small>PORT OPERATIONS INTELLIGENCE</small></span></Link><nav><Link href="/#feed">Operations</Link><Link href="/legal/data">Data Policy</Link></nav></header>
     <article className="dictionaryIntro">
       <p className="kicker">REFERENCE · BETA</p>
       <h1>Port Call Data Dictionary</h1>
