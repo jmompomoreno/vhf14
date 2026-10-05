@@ -37,6 +37,6 @@ export default function DataDictionaryPage() {
       <dl><div><dt>Public operational data</dt><dd>{dataClassification.public}</dd></div><div><dt>Restricted professional data</dt><dd>{dataClassification.restricted}</dd></div><div><dt>Internal control data</dt><dd>{dataClassification.internal}</dd></div></dl>
       <p className="dictionaryBoundary">Do not submit personal data, security-sensitive information, confidential instructions or navigational information not authorised for publication.</p>
     </section>
-    <footer><span>VHF14 · PORT OPERATIONS INTELLIGENCE</span><nav><Link href="/">Operations</Link><Link href="/contact">Contact</Link><Link href="/legal/data">Data & verification</Link></nav></footer>
+    <footer><span className="footerIdentity"><b>VHF14 · PORT OPERATIONS INTELLIGENCE</b><small>Operated by Maritime Intelligence S.L.U. · © 2026</small></span><nav><Link href="/">Operations</Link><Link href="/contact">Contact</Link><Link href="/legal/notice">Legal Notice</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/data">Data & verification</Link></nav></footer>
   </main>;
 }

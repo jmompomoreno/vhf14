@@ -77,7 +77,7 @@ export function VHF14Home({initialReportOpen=false}:{initialReportOpen?:boolean}
    </article>)}</div>
    {!shown.length&&<div className="empty">No port calls match this view.<button type="button" onClick={clear}>Show all calls</button></div>}{shown.length>pageSize&&<nav className="pagination" aria-label="Port call pages"><button disabled={currentPage===1} onClick={()=>setPage(p=>Math.max(1,p-1))}>Previous</button><span>Page {currentPage} of {pageCount}</span><button disabled={currentPage===pageCount} onClick={()=>setPage(p=>Math.min(pageCount,p+1))}>Next</button></nav>}
   </section>
-  <footer><span>VHF14 · PORT OPERATIONS INTELLIGENCE</span><nav><a href="/data-dictionary">Data dictionary</a><a href="/contact">Contact</a><a href="/legal/terms">Terms</a><a href="/legal/privacy">Privacy</a><a href="/legal/data">Data & verification</a></nav></footer>
+  <footer><span className="footerIdentity"><b>VHF14 · PORT OPERATIONS INTELLIGENCE</b><small>Operated by Maritime Intelligence S.L.U. · © 2026</small></span><nav><a href="/data-dictionary">Data dictionary</a><a href="/contact">Contact</a><a href="/legal/notice">Legal Notice</a><a href="/legal/terms">Terms</a><a href="/legal/privacy">Privacy</a><a href="/legal/data">Data & verification</a></nav></footer>
   {open&&<div className="modal reportModal" role="dialog" aria-modal="true" aria-labelledby="report-title"><form className="reportForm" onSubmit={submit}>
    <div className="modalHead"><div><p className="kicker">STRUCTURED REPORT</p><h2 id="report-title">Report an operational event</h2></div><button type="button" onClick={()=>setOpen(false)} aria-label="Close">×</button></div>
    <p>Enter the operational time. VHF14 converts Port Local Time to UTC automatically.</p>
