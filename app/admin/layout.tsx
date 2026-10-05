@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <><nav className="adminSectionNav" aria-label="Administration"><Link href="/admin">Verification</Link><Link href="/admin/users">Users &amp; Profiles</Link></nav>{children}</>;
+  return <><nav className="adminSectionNav" aria-label="Administration"><Link href="/admin">Operations &amp; Verification</Link><Link href="/admin/users">Users &amp; Profiles</Link><Link href="/admin/audit">Audit Log</Link></nav>{children}</>;
 }
